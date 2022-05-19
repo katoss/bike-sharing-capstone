@@ -1,3 +1,10 @@
+---
+title: "README"
+author: "kk"
+date: '2022-05-19'
+output: rmarkdown::github_document
+---
+
 # Case Study: How Does a Bike-Share Navigate Speedy Success?
 Capstone project example of the [Google Data Analytics Certificate](https://www.coursera.org/professional-certificates/google-data-analytics).
 
