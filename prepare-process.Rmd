@@ -1,0 +1,159 @@
+---
+title: "Prepare and Process"
+author: "kk"
+date: '2022-05-19'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prepare
+* __Where is your data located?__ A link is provided to a website where the data can be downloaded.
+* __How is the data organized?__ There are zip files with tripdata for each month from April 2020 to April 2022. There are also other files which seem to contain summarized quarterly summarized tripdata from 2013 to 2018. The naming is not consistent. The task is to only look at the last 12 months, so I only download files from May 2021 to April 2022.
+* __Are there issues with bias or credibility in this data? Does your data ROCCC?__ In this case, without having looked at the data itself yet, I'd say that this data is credible, because in this scenario it has been provided to me by the company itself. I would also say that it is unbiased, because (normally) it should contain the automatically recorded trip data from all clients. In terms of ROCCC, I would say that the data is __R__eliable (accurate, complete and unbiased), because it is automatically collected, and there are files for each month. It is also __O__riginal, because it is first-hand from the company. I cannot say yet if the data is __C__omprehensive (containing all information needed to answer the question), because I haven't looked at it yet. The data is __C__urrent, because it contains up-to-date information from the last months. It is also __C__ited, because I know where it is coming from. 
+* __How are you addressing licensing, privacy, security, and accessibility?__ The data comes with a license, that states that the data is available to the public, and that it can be included as source material in analyses, reports or studies published for non-commercial purposes. This is applies to my case, so I think that there are no issues if I upload the data here together with my analysis.
+* __How did you verify the data's integrity?__ At first I checked what source the data was coming from, and if it is a reliable one. I'd say yes, because it is directly from the bike rental company who rents the bikes (in our fictonal case, but also in reality, it is data from a bike rental company in Chicago). I read all the csv files from the last 12 months to data frames, and summarized them using r's glimpse and skim functions to get an overview. I checked if all had the same columns, the datatypes, if there were missing values, and if there were any hints for bias. 
+* __How does it help answer your question?__ The question to address is "How do annual members and casual riders use Cyclistic bikes differently?". Consequently, a first requirement the data must fulfill is having a distinction between casual and annual members. This requirement is fulfilled with the column ("members_casual"), which sorts the users in categories. Apart from that, the data contains information on the type of bike used, the duration of trips, as well as start and end stations and their location. With this data, it is possible to address the question in some ways: I could determine if annual or casual users use different types of bikes, if they use it for different trip durations, and if there are differences in the variation of stations addressed. Maybe there are even location-based hints, like e.g. casual users use bikes more in free time (e.g. to go to parks) and annual members more to go to work. But this could be complicated, because I don't know Chicago that much, and might require additional research from my side.
+* __Are there any problems with the data?__ I would say that in terms of integrity the data looks fine (see above). After getting an overview of the data I see some problems. There seems to be a systematic issue with the recording of the end-station location (latitude and longitude), because each dataset has missing data for these columns. Moreover, there are lots of missing values (not NA, but empty strings) for start and end station name and id. Another thing I noticed is that the datetime values for start and end time are of type "character" and not "date" or "datetime".
+
+__Note:__ I commented out all skim functions in the code chunks because their execution took too long.
+```{r prepare data}
+library(readr)
+library(tidyverse)
+library(skimr)
+# read all the csv files into a list and then create a list of data frames from them
+filenames <- list.files(path="raw-data")
+print(filenames)
+setwd("raw-data")
+filelist <- lapply(filenames, read.csv)
+print(length(filelist)) # check if length is 12
+# change names of files to something shorter for the dataframes
+names(filelist) <- c("df_05_21","df_06_21","df_07_21","df_08_21","df_09_21","df_10_21","df_11_21","df_12_21","df_01_22","df_02_22","df_03_22","df_04_22")
+# check if all data frames have the same number of columns
+for (i in 1:length(filelist)) {
+  print(dim(filelist[[i]]))
+}
+# create overviews and summaries of all data frames to get a first impression
+for (i in 1:length(filelist)) {
+  glimpse(filelist[[i]])
+}
+# skim each df manually, because it does not seem to work in a loop (I don't manage to find out why:( )) 
+#skim(filelist[1])
+#skim(filelist[2])
+#skim(filelist[3])
+#skim(filelist[4])
+#skim(filelist[5])
+#skim(filelist[6])
+#skim(filelist[7])
+#skim(filelist[8])
+#skim(filelist[9])
+#skim(filelist[10])
+#skim(filelist[11])
+#skim(filelist[12])
+
+# make one combined data frame from all the data frames
+df_all <- bind_rows(filelist, .id = "column_label")
+glimpse(df_all)
+#skim(df_all)
+```
+
+## Process
+* __What tools are you choosing and why?__ I'm choosing r, because it is powerful and flexible, and good for working with large datasets, and I would like to practice using it. 
+* __Have you ensured your data's integrity?__ Yes, see 'Prepare' section above.
+* __What steps have you taken to ensure that your data is clean?__ See below.
+* __How can you verify that your data is clean and ready to analyse?__ I looked through all columns and determined if their values and data types made sense, if there were impossible or missing values, and fixed accordingly if necessary. I looked manually or at summary statistics.
+* __Have you documented your cleaning process so you can review and share those results?__ See below.
+
+### Steps:
+* Back up original data: put them in folder "raw-data" and will save cleaned files in folder "output-data"
+* Check for missing values and decide how to deal with them:
+```{r df for cleaned version}
+# make new df for cleaned / wip version
+df_all_clean <- df_all
+## check for missing values and decide how to deal with them
+# skim(df_all_clean)
+```
+  *There are 4766 missing values for end_lat and end_long each. There are also empty strings in other columns (but not NA): start_station_name (790,207), start_station_id (790,204), end_station_name (843,361), and end_station_id (843,361). For now I will leave it like it is, but keep that in mind.
+* Check for duplicates: the output from skim() contains a n_unique column. It states that there are 5,757,551 unique ride ids, which equals the number of rows. Thus, there seem to be no duplicates, assuming that the ride id is trustworthy
+* remove extra spaces and blanks
+```{r remove blanks}
+## removing extra spaces and blanks
+#df_all_clean <- trimws(df_all_clean, "both") # did not end up doing this because the function did not finish in a reasonable amout of time
+```
+* check for irrelevant data: here are not many columns, and I would not judge any of them as irrelevant per se. Those columns with many missing values could be judged to be less relevant, because they are not complete. However, those rows that have no missing values in these columns could still give insights. So I'd not remove any data at this point. Moreover, I downloaded only data from the last 12 months, so there is no old data in my dataset that could be irrelevant.
+* check if columns are named meaningfully
+```{r colnames check}
+## are the columns named meaningfully?
+colnames(df_all_clean) # yes
+```
+* check if strings are consistent and meaningful
+```{r string consistency}
+## are strings consistent and meaningful? check if there are spelling errors or formatting issues.
+### for 'factors': I looked at possible values of 'rideable_type' and 'member_casual" and counted their occurrences.
+df_all %>%  count(rideable_type)
+unique(df_all$rideable_type)
+df_all %>% count(member_casual)
+unique(df_all$member_casual)
+```
+  * The values of the factors seem to make sense. The ride ids equal the number of rows, and the sample I checked seemed to be formatted reasonably. For the rest, I also checked a sample manually. The station ids seem to have two different formats. The station names seem to look reasonably formatted, but I'm not an expert on the area and its naming conventions.
+* __Check for misfielded values:__ I only looked at a subset but that looks fine.
+* __Check for mismatched data types:__ the only datatypes used are character and numeric. Those columns that have a small, distinct numbers of values.
+```{r mismatched types}
+# check for mismatched data types
+## "should be transformed into 'factor', start and end times to 'datetime'
+#df_all_clean["member_casual"] <- as.factor(df_all_clean["member_casual"]) # didn't do for now because it took long and returned NA, TODO: find out why
+#df_all_clean["rideable_type"] <- as.factor(df_all_clean["rideable_type"]) # see above. Also: do I really need to transform chr to factor?
+df_all_clean$started_at <- as.POSIXct(df_all_clean$started_at, format="%Y-%m-%d %H:%M:%S") #2021-05-25 17:28:11
+df_all_clean$ended_at <- as.POSIXct(df_all_clean$ended_at, format="%Y-%m-%d %H:%M:%S")
+glimpse(df_all_clean)
+```
+* __create new columns:__
+```{r new columns}
+# create new column ride length
+df_all_clean$ride_length <- df_all_clean$ended_at - df_all_clean$started_at
+## format from seconds to dd:hh:mm:ss
+library(lubridate)
+df_all_clean$ride_length_period <- seconds_to_period(df_all_clean$ride_length) 
+glimpse(df_all_clean)
+
+# create day of week column for start date
+df_all_clean$day_of_week <- weekdays(df_all_clean$started_at)
+```
+* __Check for irregularities:__
+```{r irregularities}
+## check for data irregularities (invalid values or outliers)
+summary(df_all_clean)
+```
+  * There are outliers in the "ride_length_period" column:  Min.   :-58M -2S, Max.   :38d 20H 24M 9S. I will check them manually by sorting, then remove rows with values that make now sense.
+```{r irregularities 2}
+# sort and check
+df_sorted <- arrange(df_all_clean, ride_length_period)
+#View(df_sorted)
+head(df_all_clean)
+df_all_clean$ride_length_num <- as.numeric(df_all_clean$ride_length)
+glimpse(df_all_clean)
+print(sum(df_all_clean$ride_length_period < 0, na.rm = TRUE))
+#View(df_all_clean)
+print(sum(df_all_clean$ride_length_period == 0, na.rm = TRUE))
+
+# i'm wondering why the skim method did not show me the missing values for start and end before. Now it shows.
+# skim(df_all_clean)
+```
+  * There are 140 minus values. I should drop them when I work with them later on. There are also rides with a duration of 0s (512) or a few s. In a real-world scenario, I would ask the stakeholders. What this could mean and if they want to keep the data. I would ask them if they know what could have caused this. In this fictional case I will only remove the negative rides.
+```{r remove neg}
+# remove all rows that have negative or missing values for ride length
+df_all_no_na <- subset(df_all_clean, (!is.na(df_all_clean["ride_length"])))
+df_all_no_neg <- subset(df_all_no_na, df_all_no_na["ride_length"]>= 0)
+glimpse(df_all_no_neg)
+# skim(df_all_no_neg)
+```
+* __Save clean file:__
+```{r save}
+## save to csv for storage / for later
+getwd()
+#write.csv(df_all_clean, "../output-data/allbikedata-clean.csv", row.names = FALSE)
+#write.csv(df_all_no_neg, "../output-data/allbikedata-clean_onlyvalidridelength.csv", row.names = FALSE)
+```
+
