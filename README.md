@@ -28,7 +28,7 @@ compelling data insights and professional data visualizations.
 
 ## Preparation and processing of data
 
-For details see file [prepare-process](prepare-process.Rmd).
+For details see file [prepare-process](prepare-process.md).
 
 ### Description of data sources used
 
@@ -53,7 +53,7 @@ I merged all 12 files to one and saved it as a new file in the folder
 
 ## Analysis and visualizations
 
-For details see file [analyze-share](analyze-share.Rmd).
+For details see file [analyze-share](analyze-share.md).
 
 ## Insights and recommendations with regards to the business task
 
