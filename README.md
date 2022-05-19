@@ -1,8 +1,3 @@
-README
-================
-kk
-2022-05-19
-
 # Case Study: How Does a Bike-Share Navigate Speedy Success?
 
 Capstone project example of the [Google Data Analytics
