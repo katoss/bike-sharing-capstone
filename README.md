@@ -62,16 +62,13 @@ For details see file [analyze-share](analyze-share.md).
 ## Insights and recommendations with regards to the business task
 
 The question was “How do annual members and casual riders use Cyclistic
-bikes differently?”. Here are some insights: \* There are more rides
-from annual members (3,221,055), than from casual users (2,536,267).
-What we don’t know is the number of rides by person. \* Annual members
-use only classic and electric bikes, not docked bikes. Casual riders use
-all three types. This might be due to restrictions in docked bike usage
-for members, but I would have to ask the stakeholder to find this out.
-\* The most popular bike type in general are classic bikes, but the
-percentage is greater in annual members. Maybe annual members are more
-sportive, maybe they rather choose the classic bike because it is
-cheaper, or they pick classic bikes because they go on shorter rides.
+bikes differently?”. Here are some insights: 
+
+-   There are more rides from annual members (3,221,055), than from casual users (2,536,267).
+What we don’t know is the number of rides by person.
+-   Annual members use only classic and electric bikes, not docked bikes. Casual riders use all three types. This might be due to restrictions in docked bike usage for members, but I would have to ask the stakeholder to find this out.
+-   The most popular bike type in general are classic bikes, but the percentage is greater in annual members. Maybe annual members are more sportive, maybe they rather choose the classic bike because it is cheaper, or they pick classic bikes because they go on shorter rides. 
+
 There could be many different reasons.
 
 -   Casual riders tend to go on longer rides than annual members, and
